@@ -1,16 +1,11 @@
 #include <ESP8266WiFi.h>                  // Include the WiFi library.
 #include <MQTT.h>                         // Include the MQTT library.
 #include <Wire.h>                         // Include Wire library, required for I2C devices
-#include <Adafruit_Sensor.h>  				    // Include Adafruit sensor library
-#include <Adafruit_BMP280.h>  				    // Include Adafruit library for BMP280 sensor
-
-#define BMP280_I2C_ADDRESS  0x76
 
 const char* ssid     = "Red";             // The case-sensitive SSID of the WiFi network you want to connect to.
 const char* password = "8012254722";      // The password of the WiFi network.
 WiFiClient wifiClient;
 MQTTClient mqttClient;
-Adafruit_BMP280 bmp280;
 unsigned long lastMillis = 0;
 
 
@@ -58,13 +53,6 @@ void setup()
   Serial.print( "WiFi connecting to " );
   Serial.println( ssid );
 
-  if( !bmp280.begin( BMP280_I2C_ADDRESS ) )
-  {
-    Serial.println( "Could not find a valid BMP280 sensor!" );
-    Serial.println( "Check wiring, and restart the Arduino!" );
-    while( 1 );
-  }
-
   int i = 0;
   /*
      WiFi.status() return values:
@@ -91,7 +79,7 @@ void setup()
 
   pinMode( LED_BUILTIN, OUTPUT );      // Initialize digital pin LED_BUILTIN as an output.
 
-  mqttClient.begin( "127.0.0.1", wifiClient );
+  mqttClient.begin( "broker.shiftr.io", wifiClient );
   mqttClient.onMessage( messageReceived );
 
   connect();
@@ -100,21 +88,6 @@ void setup()
 
 void loop()
 {
-  // get temperature, pressure and altitude from library
-  float temperature = bmp280.readTemperature();			// Get temperature.
-  float pressure    = bmp280.readPressure();				// Get pressure.
-  float altitude_   = bmp280.readAltitude( 1013.25 );	// Get altitude (this should be adjusted to your local forecast).
-
-  Serial.print( "Temperature: " );
-  Serial.print( temperature );
-  Serial.println( " °C" );
-  Serial.print( "Pressure: " );
-  Serial.print( pressure );
-  Serial.println( " hPa" );
-  Serial.print( "Altitude: " );
-  Serial.print( altitude_ );
-  Serial.println( " m" );
-
   mqttClient.loop();
 
   if ( !mqttClient.connected() )
@@ -134,5 +107,5 @@ void loop()
   digitalWrite( LED_BUILTIN, LOW );    // Turn the LED off.
   delay( 1000 );                       // Wait for one second.
   Serial.print( "IP address:\t" );
-  Serial.println( WiFi.localIP() );    // Send the IP address of the ESP8266 to the computer.
+  Serial.println( WiFi.localIP() );    // Send the IP address of the ESP8266 to the serial port.
 }
