@@ -5,7 +5,7 @@
 
 const char* ssid     = "Red";             // The case-sensitive SSID of the WiFi network you want to connect to.
 const char* password = "8012254722";      // The password of the WiFi network.
-const char* broker = "127.0.0.1";         // The MQTT broker name.
+const char* broker = "192.168.55.200";         // The MQTT broker name.
 const String mqttTopic = "MQTTTest001";    // The MQTT topic.
 WiFiClient wifiClient;
 MQTTClient mqttClient( 512 );             // Create a client with a 512 byte buffer.  The default is 128 bytes.
@@ -145,7 +145,9 @@ void loop()
 //    mqttClient.publish( "/hello", "world" );
     char * myStr;
     sprintf( myStr, "%lu", loopCount );
-    mqttClient.publish( mqttTopic, myStr );
+    JSONVar publishObject;
+    publishObject[mqttTopic] = myStr;
+    mqttClient.publish( "MQTTTest001", publishObject );
   }
 
   digitalWrite( LED_BUILTIN, HIGH );   // Turn the LED on.
